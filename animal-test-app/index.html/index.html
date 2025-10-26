@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>🐾 나의 동물 성격 테스트 🐾</title>
+
+  <!-- ✅ Google AdSense 자동 광고 코드 -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1741496010708311"
+     crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-1741496010708311">
+
+  <style>
+    :root {
+      --main-color: #ffb84d;
+      --main-dark: #ffa31a;
+      --bg-color: #fff7e6;
+    }
+
+    body {
+      font-family: "Noto Sans KR", sans-serif;
+      background-color: var(--bg-color);
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+      transition: background-color 0.3s;
+    }
+
+    h1, h2, p {
+      margin: 10px 0;
+      word-break: keep-all;
+    }
+
+    button {
+      background-color: var(--main-color);
+      border: none;
+      padding: 12px 25px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 8px;
+      width: 85%;
+      max-width: 320px;
+    }
+
+    button:hover {
+      background-color: var(--main-dark);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #result-img {
+      width: 70%;
+      max-width: 250px;
+      margin-top: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    #progress-container {
+      width: 90%;
+      background-color: #eee;
+      border-radius: 15px;
+      margin: 15px auto;
+      height: 18px;
+      overflow: hidden;
+    }
+
+    #progress-bar {
+      width: 0%;
+      height: 100%;
+      background-color: var(--main-color);
+      transition: width 0.3s ease;
+    }
+
+    #shareSection {
+      margin-top: 20px;
+    }
+
+    #shareSection button {
+      width: 75%;
+      max-width: 250px;
+      font-size: 15px;
+    }
+
+    /* 반응형 */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.6em;
+      }
+      h2 {
+        font-size: 1.3em;
+      }
+      button {
+        font-size: 15px;
+        padding: 10px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="start-screen">
+    <h1>🐾 나의 동물 성격 테스트 🐾</h1>
+    <p>10개의 질문으로 알아보는 나의 성격 타입!</p>
+    <button id="start-btn">시작하기</button>
+  </div>
+
+  <div id="quiz-screen" class="hidden">
+    <div id="progress-container"><div id="progress-bar"></div></div>
+    <h2 id="question"></h2>
+    <div id="answers"></div>
+  </div>
+
+  <div id="result-screen" class="hidden">
+    <h2 id="result-title"></h2>
+    <img id="result-img" src="" alt="animal result" />
+    <p id="result-desc"></p>
+
+    <!-- ✅ 광고 자리 (결과 하단 수동 광고 표시 가능 영역) -->
+    <div style="margin:20px 0;">
+      <ins class="adsbygoogle"
+          style="display:block"
+          data-ad-client="ca-pub-1741496010708311"
+          data-ad-slot="1234567890"
+          data-ad-format="auto"
+          data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+
+    <div id="shareSection">
+      <h3>🔗 친구에게 결과 공유하기</h3>
+      <button id="shareInstagram" style="background:#E1306C; color:white;">📸 인스타그램에 공유하기</button>
+      <button id="copyLink" style="background:#4A90E2; color:white;">🔗 링크 복사하기</button>
+    </div>
+
+    <button id="retry-btn">다시하기</button>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("start-btn");
+    const retryBtn = document.getElementById("retry-btn");
+    const startScreen = document.getElementById("start-screen");
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultScreen = document.getElementById("result-screen");
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
+    const resultTitle = document.getElementById("result-title");
+    const resultDesc = document.getElementById("result-desc");
+    const resultImg = document.getElementById("result-img");
+    const progressBar = document.getElementById("progress-bar");
+
+    let current = 0;
+    let score = 0;
+
+    const questions = [
+      { q: "1️⃣ 친구와 약속에 늦었을 때 나는?", a: ["괜찮아~ 이해해 😊", "조금 불편해 😑", "화난다 😡"] },
+      { q: "2️⃣ 주말엔 주로?", a: ["집콕 🏠", "친구랑 외출 ☕", "새로운 곳 탐험 🌍"] },
+      { q: "3️⃣ 시험기간엔?", a: ["미리 준비 📖", "하루 전 벼락치기 ⚡", "감으로 승부 😅"] },
+      { q: "4️⃣ 단체 활동에서 나는?", a: ["조용히 따른다 😶", "아이디어 낸다 💡", "리더를 맡는다 🦁"] },
+      { q: "5️⃣ 기분이 안 좋을 땐?", a: ["혼자 쉰다 😔", "친구한테 털어놓는다 🗣️", "운동/산책 🚶‍♂️"] },
+      { q: "6️⃣ 목표를 세울 때?", a: ["작고 확실한 것 🎯", "크고 멋진 꿈 🌈", "상황 봐서 조절 ⚖️"] },
+      { q: "7️⃣ 새로운 사람을 만나면?", a: ["먼저 말 못 건넨다 🙈", "편하게 이야기한다 🙂", "분위기 주도 😎"] },
+      { q: "8️⃣ 일할 때 중요한 건?", a: ["속도 ⚡", "정확함 🎯", "아이디어 💡"] },
+      { q: "9️⃣ 스트레스 받을 때?", a: ["음악 듣기 🎧", "친구 만나기 ☕", "운동 🏃‍♀️"] },
+      { q: "🔟 내 성격 한 줄 요약은?", a: ["차분함 🌿", "열정적 🔥", "리더형 💪"] },
+    ];
+
+    startBtn.addEventListener("click", () => {
+      startScreen.classList.add("hidden");
+      quizScreen.classList.remove("hidden");
+      showQuestion();
+    });
+
+    retryBtn.addEventListener("click", () => {
+      resultScreen.classList.add("hidden");
+      startScreen.classList.remove("hidden");
+      current = 0;
+      score = 0;
+      progressBar.style.width = "0%";
+    });
+
+    function showQuestion() {
+      const q = questions[current];
+      questionEl.textContent = q.q;
+      answersEl.innerHTML = "";
+
+      const progress = ((current) / questions.length) * 100;
+      progressBar.style.width = progress + "%";
+
+      q.a.forEach((answer, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = answer;
+        btn.addEventListener("click", () => {
+          score += index + 1;
+          nextQuestion();
+        });
+        answersEl.appendChild(btn);
+      });
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current < questions.length) {
+        showQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      quizScreen.classList.add("hidden");
+      resultScreen.classList.remove("hidden");
+      progressBar.style.width = "100%";
+
+      let type, desc, img;
+      if (score <= 13) {
+        type = "🐰 감성 토끼형";
+        desc = "다정하고 감정이 풍부한 성격이에요.";
+        img = "https://cdn.pixabay.com/photo/2014/06/21/08/43/rabbit-373691_1280.jpg";
+      } else if (score <= 16) {
+        type = "🐢 차분 거북형";
+        desc = "신중하고 안정적인 성격이에요.";
+        img = "https://cdn.pixabay.com/photo/2013/07/12/18/20/turtle-153204_1280.png";
+      } else if (score <= 19) {
+        type = "🦊 센스 여우형";
+        desc = "눈치 빠르고 상황 판단이 뛰어나요!";
+        img = "https://cdn.pixabay.com/photo/2019/08/06/10/40/fuchs-4388014_1280.jpg";
+      } else if (score <= 22) {
+        type = "🦁 리더 사자형";
+        desc = "카리스마 있고 주도적인 리더예요!";
+        img = "https://cdn.pixabay.com/photo/2023/06/29/10/33/lion-8096155_1280.png";
+      } else if (score <= 25) {
+        type = "🐼 힐링 판다형";
+        desc = "포근하고 평화로운 성격이에요.";
+        img = "https://cdn.pixabay.com/photo/2022/10/07/09/24/little-panda-7504633_1280.jpg";
+      } else if (score <= 28) {
+        type = "🐯 열정 호랑이형";
+        desc = "열정과 추진력이 넘쳐요!";
+        img = "https://cdn.pixabay.com/photo/2017/01/12/21/42/tiger-1975790_640.jpg";
+      } else if (score <= 31) {
+        type = "🦉 지혜 부엉이형";
+        desc = "분석적이고 생각이 깊어요.";
+        img = "https://cdn.pixabay.com/photo/2020/11/09/12/56/owl-5724323_1280.jpg";
+      } else {
+        type = "🦅 도전 독수리형";
+        desc = "야망 있고 목표가 뚜렷한 타입이에요!";
+        img = "https://cdn.pixabay.com/photo/2016/08/22/09/19/eagle-1610035_1280.jpg";
+      }
+
+      resultTitle.textContent = type;
+      resultDesc.textContent = desc;
+      resultImg.src = img;
+    }
+
+    document.getElementById("shareInstagram").addEventListener("click", () => {
+      alert("📸 결과 화면을 스크린샷 찍어서 인스타 스토리나 피드에 올려보세요!");
+    });
+
+    document.getElementById("copyLink").addEventListener("click", () => {
+      navigator.clipboard.writeText(window.location.href)
+        .then(() => alert("✅ 링크 복사 완료! 인스타 프로필에 붙여보세요."))
+        .catch(() => alert("❌ 링크 복사 실패!"));
+    });
+  </script>
+</body>
+</html>
